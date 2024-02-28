@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  db:
+    image: mariadb
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: tpos_database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: tpos_password
+    ports:
+      - "3306:3306"
+    networks:
+      - tposnet
+
+
+  filler:
+    build:
+      context: .
+      dockerfile: dockerfile_filler
+    depends_on:
+       db:
+         condition: service_healthy
+    volumes:
+      - ./data.csv:/data.csv
+    networks:
+      - tposnet
+
+  web:
+    build:
+      context: .
+      dockerfile: dockerfile_web
+    depends_on:
+       db:
+         condition: service_healthy
+       filler:
+         condition: service_started
+    ports:
+      - "8000:8000"
+    networks:
+      - tposnet
+
+
+networks:
+  tposnet:
+    driver: bridge

@@ -1,0 +1,7 @@
+FROM python:3.8
+
+RUN pip install flask mariadb
+
+COPY web.py ./
+
+CMD python3 web.py

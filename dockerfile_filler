@@ -1,0 +1,7 @@
+FROM python:3.8
+
+RUN pip install flask mariadb
+
+COPY filler.py ./
+
+CMD python3 filler.py
